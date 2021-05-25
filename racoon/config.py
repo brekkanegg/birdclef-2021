@@ -102,6 +102,11 @@ CFG.pretrained = True
 CFG.num_classes = 397
 CFG.in_channels = 1
 
+CFG.transforms = {
+        "train": [{"name": "Normalize"}],
+        "valid": [{"name": "Normalize"}]
+    }
+
 os.environ["CUDA_VISIBLE_DEVICES"] = CFG.gpu
 
 CFG.logdir = f"/data2/minki/kaggle/ramdisk/out/{CFG.name}"

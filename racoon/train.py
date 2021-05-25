@@ -59,11 +59,15 @@ from config import CFG
 from opts import get_optimizer, get_scheduler
 
 if CFG.use == 1:
-    from data import WaveformDataset  # , get_transforms
-    from model import TimmSED
+    from inputs.data import WaveformDataset  # baseline
+    from models.model import TimmSED
 elif CFG.use == 2:
-    from data2 import WaveformDataset  # , get_transforms
-    from model2 import TimmSED
+    from inputs.data2 import WaveformDataset  # , get_transforms
+    from models.model2 import TimmSED
+elif CFG.use == 3:
+    from inputs.data3 import WaveformDataset  # , get_transforms
+    from models.model2 import TimmSED
+
 
 from losses import get_criterion
 from callbacks import get_callbacks
@@ -126,6 +130,10 @@ splitter = getattr(model_selection, CFG.split)(**CFG.split_params)
 # data
 train = pd.read_csv(CFG.train_csv)
 
+# add rating cut
+train = train.query("rating>=3").reset_index()
+
+
 # main loop
 for i, (trn_idx, val_idx) in enumerate(splitter.split(train, y=train["primary_label"])):
     if i == CFG.fold:
@@ -163,6 +171,12 @@ criterion = get_criterion()
 optimizer = get_optimizer(model)
 scheduler = get_scheduler(optimizer)
 callbacks = get_callbacks()
+
+# if CFG.mixup:
+#     from catalyst.dl.callbacks import MixupCallback
+
+#     callbacks += [MixupCallback]
+
 runner = get_runner(device)
 runner.train(
     model=model,

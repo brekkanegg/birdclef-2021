@@ -35,7 +35,7 @@ class SampleF1Callback(Callback):
         self.target: List[np.ndarray] = []
 
     def on_batch_end(self, state: IRunner):
-        targ = state.input[self.input_key].detach().cpu().numpy()
+        targ = state.input[self.input_key].detach().cpu().numpy() > 0.5
         out = state.output[self.output_key]
 
         clipwise_output = out["clipwise_output"].detach().cpu().numpy()
@@ -79,13 +79,13 @@ class mAPCallback(Callback):
         self.target: List[np.ndarray] = []
 
     def on_batch_end(self, state: IRunner):
-        targ = state.input[self.input_key].detach().cpu().numpy()
+        targ = state.input[self.input_key].detach().cpu().numpy() > 0.5
         out = state.output[self.output_key]
 
         clipwise_output = out[self.model_output_key].detach().cpu().numpy()
 
         self.prediction.append(clipwise_output)
-        self.target.append(targ)
+        self.target.append(targ > 0.5)
 
         try:
             score = metrics.average_precision_score(targ, clipwise_output, average=None)
@@ -106,6 +106,10 @@ class mAPCallback(Callback):
             state.epoch_metrics[state.valid_loader + "_epoch_" + self.prefix] = score
         else:
             state.epoch_metrics["train_epoch_" + self.prefix] = score
+
+
+class mixupCallback(Callback):
+    pass
 
 
 def get_callbacks():

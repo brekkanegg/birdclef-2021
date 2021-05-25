@@ -4,8 +4,6 @@ import soundfile as sf
 from pathlib import Path
 import librosa
 
-from albumentations.pytorch import ToTensorV2
-from albumentations.core.transforms_interface import ImageOnlyTransform
 from audiomentations import *
 
 import torch.utils.data as torchdata
@@ -46,6 +44,10 @@ class WaveformDataset(torchdata.Dataset):
         wav_name = sample["filename"]
         ebird_code = sample["primary_label"]
 
+        ebird_code_second = (
+            sample["secondary_labels"].replace("'", "")[1:-1].split(", ")
+        )
+
         y, sr = sf.read(self.datadir / ebird_code / wav_name)
 
         y = crop_or_pad(
@@ -59,10 +61,7 @@ class WaveformDataset(torchdata.Dataset):
         if self.wav_transfos is not None:
             y = self.wav_transfos(y, CFG.sample_rate)
 
-        # FIXME:
         melspec = compute_melspec(y, CFG)
-        # image = mono_to_color(melspec)
-        # image = normalize(image, mean=None, std=None)
         melspec = (melspec - melspec.mean()) / (melspec.std() + 1e-6)
         melspec = (melspec - melspec.min()) / (melspec.max() - melspec.min() + 1e-6)
 
@@ -73,8 +72,10 @@ class WaveformDataset(torchdata.Dataset):
 
         labels = np.zeros(len(CFG.target_columns), dtype=float)
 
-        # FIXME: secondary label
         labels[CFG.target_columns.index(ebird_code)] = 1.0
+
+        for c in ebird_code_second:
+            labels[CFG.target_columns.index(c)] = 0.5
 
         return {"image": image, "targets": labels}
 

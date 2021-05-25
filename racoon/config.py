@@ -51,7 +51,8 @@ parser.add_argument(
     type=str,
     default="/data2/minki/kaggle/ramdisk/background_32",
 )
-
+parser.add_argument("--mixup", action="store_true")
+parser.add_argument("--use_secondary_label", "--sec", action="store_true")
 
 ######################
 # Loaders #
@@ -62,7 +63,7 @@ parser.add_argument("--num_workers", "--nw", type=int, default=4)
 
 parser.add_argument(
     "--base_model_name", "--model", type=str, default="resnet34"
-)  # "tf_efficientnet_b0_ns"
+)  # "tf_efficientnet_b0_ns", resnest101e
 parser.add_argument(
     "--loss_name", "--loss", type=str, default="BCEFocal2WayLoss"
 )  # "tf_efficientnet_b0_ns"
@@ -102,10 +103,7 @@ CFG.pretrained = True
 CFG.num_classes = 397
 CFG.in_channels = 1
 
-CFG.transforms = {
-        "train": [{"name": "Normalize"}],
-        "valid": [{"name": "Normalize"}]
-    }
+CFG.transforms = {"train": [{"name": "Normalize"}], "valid": [{"name": "Normalize"}]}
 
 os.environ["CUDA_VISIBLE_DEVICES"] = CFG.gpu
 

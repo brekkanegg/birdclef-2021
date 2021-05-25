@@ -3,12 +3,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import timm
-from torchlibrosa.stft import LogmelFilterBank, Spectrogram
-from torchlibrosa.augmentation import SpecAugmentation
-
-from config import CFG
-
-import time
 
 
 def init_layer(layer):
@@ -39,44 +33,6 @@ def init_weights(model):
     elif classname.find("Linear") != -1:
         model.weight.data.normal_(0, 0.01)
         model.bias.data.zero_()
-
-
-def do_mixup(x: torch.Tensor, mixup_lambda: torch.Tensor):
-    """Mixup x of even indexes (0, 2, 4, ...) with x of odd indexes
-    (1, 3, 5, ...).
-    Args:
-      x: (batch_size * 2, ...)
-      mixup_lambda: (batch_size * 2,)
-    Returns:
-      out: (batch_size, ...)
-    """
-    out = (
-        x[0::2].transpose(0, -1) * mixup_lambda[0::2]
-        + x[1::2].transpose(0, -1) * mixup_lambda[1::2]
-    ).transpose(0, -1)
-    return out
-
-
-class Mixup(object):
-    def __init__(self, mixup_alpha, random_seed=1234):
-        """Mixup coefficient generator."""
-        self.mixup_alpha = mixup_alpha
-        self.random_state = np.random.RandomState(random_seed)
-
-    def get_lambda(self, batch_size):
-        """Get mixup random coefficients.
-        Args:
-          batch_size: int
-        Returns:
-          mixup_lambdas: (batch_size,)
-        """
-        mixup_lambdas = []
-        for n in range(0, batch_size, 2):
-            lam = self.random_state.beta(self.mixup_alpha, self.mixup_alpha, 1)[0]
-            mixup_lambdas.append(lam)
-            mixup_lambdas.append(1.0 - lam)
-
-        return torch.from_numpy(np.array(mixup_lambdas, dtype=np.float32))
 
 
 def interpolate(x: torch.Tensor, ratio: int):
@@ -180,39 +136,6 @@ class TimmSED(nn.Module):
         self, base_model_name: str, pretrained=False, num_classes=24, in_channels=1
     ):
         super().__init__()
-        # Spectrogram extractor
-        # self.spectrogram_extractor = Spectrogram(
-        #     n_fft=CFG.n_fft,
-        #     hop_length=CFG.hop_length,
-        #     win_length=CFG.n_fft,
-        #     window="hann",
-        #     center=True,
-        #     pad_mode="reflect",
-        #     freeze_parameters=True,
-        # )
-
-        # # Logmel feature extractor
-        # self.logmel_extractor = LogmelFilterBank(
-        #     sr=CFG.sample_rate,
-        #     n_fft=CFG.n_fft,
-        #     n_mels=CFG.n_mels,
-        #     fmin=CFG.fmin,
-        #     fmax=CFG.fmax,
-        #     ref=1.0,
-        #     amin=1e-10,
-        #     top_db=None,
-        #     freeze_parameters=True,
-        # )
-
-        # # Spec augmenter
-        # self.spec_augmenter = SpecAugmentation(
-        #     time_drop_width=64,
-        #     time_stripes_num=2,
-        #     freq_drop_width=8,
-        #     freq_stripes_num=2,
-        # )
-
-        # self.bn0 = nn.BatchNorm2d(CFG.n_mels)
 
         base_model = timm.create_model(
             base_model_name, pretrained=pretrained, in_chans=in_channels
@@ -234,26 +157,9 @@ class TimmSED(nn.Module):
         # init_bn(self.bn0)
 
     def forward(self, x):
-        # (batch_size, 1, time_steps, freq_bins)
-        # x = self.spectrogram_extractor(input)
-        # # print("spectrogram time:", t1 - t0)
-
-        # x = self.logmel_extractor(x)  # (batch_size, 1, time_steps, mel_bins)
-
-        # t2 = time.time()
-        # # print("logmel time:", t2 - t1)
 
         frames_num = x.shape[2]
 
-        # x = x.transpose(1, 3)
-        # x = self.bn0(x)
-        # x = x.transpose(1, 3)
-
-        # if self.training:
-        #     x = self.spec_augmenter(x)
-
-        # x = x.transpose(2, 3)
-        # (batch_size, channels, freq, frames)
         x = self.encoder(x)
 
         # (batch_size, channels, frames)

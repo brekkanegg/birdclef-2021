@@ -74,7 +74,10 @@ class WaveformDataset(torchdata.Dataset):
             if len(ebird_code_second) > 2:
                 ebird_code_second = ebird_code_second.replace("'", "")[1:-1].split(", ")
                 for c in ebird_code_second:
-                    labels[CFG.target_columns.index(c)] = 0.5
+                    try:
+                        labels[CFG.target_columns.index(c)] = 0.5
+                    except ValueError:
+                        pass
 
         return {"image": image, "targets": labels}
 

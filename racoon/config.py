@@ -62,7 +62,7 @@ parser.add_argument("--num_workers", "--nw", type=int, default=4)
 
 
 parser.add_argument(
-    "--base_model_name", "--model", type=str, default="resnet34"
+    "--base_model_name", "--model", type=str, default="resnet50"
 )  # "tf_efficientnet_b0_ns", resnest101e
 parser.add_argument(
     "--loss_name", "--loss", type=str, default="BCEFocal2WayLoss"

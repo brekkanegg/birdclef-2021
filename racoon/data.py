@@ -31,7 +31,9 @@ class WaveformDataset(torchdata.Dataset):
 
         self.period = period
         self.validation = validation
-        self.waveform_transforms = get_wav_transforms() if not self.validation else None
+        self.waveform_transforms = (
+            self.get_wav_transforms() if not self.validation else None
+        )
 
     def __len__(self):
         return len(self.df)
@@ -91,48 +93,53 @@ class WaveformDataset(torchdata.Dataset):
 
         return {"image": y, "targets": labels}
 
+    # # FIXME: Add augmentations
+    def get_wav_transforms(self):
+        transforms = CFG.transforms
+        if self.validation:
+            phase = "valid"
+        else:
+            phase = "train"
 
-# # FIXME: Add augmentations
-# def get_transforms(phase: str):
-#     transforms = CFG.transforms
-#     if transforms is None:
-#         return None
-#     else:
-#         if transforms[phase] is None:
-#             return None
+        if transforms is None:
+            return None
+        else:
+            if transforms[phase] is None:
+                return None
 
-#         trns_list = []
-#         for trns_conf in transforms[phase]:
-#             trns_name = trns_conf["name"]
-#             trns_params = {} if trns_conf.get("params") is None else trns_conf["params"]
-#             if globals().get(trns_name) is not None:
-#                 trns_cls = globals()[trns_name]
-#                 trns_list.append(trns_cls(**trns_params))
+            trns_list = []
+            for trns_conf in transforms[phase]:
+                trns_name = trns_conf["name"]
+                trns_params = (
+                    {} if trns_conf.get("params") is None else trns_conf["params"]
+                )
+                if globals().get(trns_name) is not None:
+                    trns_cls = globals()[trns_name]
+                    trns_list.append(trns_cls(**trns_params))
 
-#         if len(trns_list) > 0:
-#             return Compose(trns_list)
-#         else:
-#             return None
+            if len(trns_list) > 0:
+                return Compose(trns_list)
+            else:
+                return None
 
-
-def get_wav_transforms():
-    """
-    Returns the transformation to apply on waveforms
-    Returns:
-        Audiomentations transform -- Transforms
-    """
-    transforms = Compose(
-        [
-            AddGaussianSNR(max_SNR=0.5, p=0.5),
-            AddBackgroundNoise(
-                sounds_path=CFG.background_datadir,
-                min_snr_in_db=0,
-                max_snr_in_db=2,
-                p=0.5,
-            ),
-        ]
-    )
-    return transforms
+    # def get_wav_transforms(self):
+    #     """
+    #     Returns the transformation to apply on waveforms
+    #     Returns:
+    #         Audiomentations transform -- Transforms
+    #     """
+    #     transforms = Compose(
+    #         [
+    #             AddGaussianSNR(max_SNR=0.5, p=0.5),
+    #             AddBackgroundNoise(
+    #                 sounds_path=CFG.background_datadir,
+    #                 min_snr_in_db=0,
+    #                 max_snr_in_db=2,
+    #                 p=0.5,
+    #             ),
+    #         ]
+    #     )
+    #     return transforms
 
 
 def normalize(y: np.ndarray):

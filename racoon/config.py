@@ -7,7 +7,7 @@ import argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument("--name", type=str, default="0525")
-parser.add_argument("--use", type=int, default=2)
+parser.add_argument("--use", type=int, default=1)
 
 
 parser.add_argument("--period", type=int, default=10)

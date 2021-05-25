@@ -88,6 +88,15 @@ class WaveformDataset(torchdata.Dataset):
 
         # FIXME: secondary label
         labels[CFG.target_columns.index(ebird_code)] = 1.0
+        if CFG.use_secondary_label:
+            ebird_code_second = sample["secondary_labels"]
+            if len(ebird_code_second) > 2:
+                ebird_code_second = ebird_code_second.replace("'", "")[1:-1].split(", ")
+                for c in ebird_code_second:
+                    try:
+                        labels[CFG.target_columns.index(c)] = 0.5
+                    except ValueError:
+                        pass
 
         return {"image": y, "targets": labels}
 

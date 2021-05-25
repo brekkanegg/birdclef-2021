@@ -49,8 +49,6 @@ from sklearn import model_selection
 
 from config import CFG
 
-os.environ["CUDA_VISIBLE_DEVICES"] = CFG.gpu
-
 
 # from sklearn import metrics
 # from timm.models.layers import SelectAdaptivePool2d

@@ -24,7 +24,7 @@ parser.add_argument("--sample_rate", type=int, default=32000)
 parser.add_argument("--gpu", "--g", type=str, default="3")
 parser.add_argument("--seed", type=int, default=52)
 parser.add_argument("--fold", type=int, default=0)
-parser.add_argument("--epochs", type=int, default=35)
+parser.add_argument("--epochs", type=int, default=100)
 parser.add_argument("--train", action="store_false")
 
 parser.add_argument("--main_metric", type=str, default="epoch_f1_at_05")

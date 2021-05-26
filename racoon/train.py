@@ -69,6 +69,11 @@ elif CFG.use == 3:
     from models.model2 import TimmSED
 
 
+print("==========")
+print(f"Method: {CFG.use}, Model: {CFG.base_model_name}, Name: {CFG.name}")
+print("==========")
+
+
 from losses import get_criterion
 from callbacks import get_callbacks
 

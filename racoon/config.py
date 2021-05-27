@@ -6,7 +6,7 @@ import argparse
 # control here
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--name", type=str, default="0525")
+parser.add_argument("--name", type=str, default="0527")
 parser.add_argument("--use", type=int, default=2)
 
 
@@ -51,6 +51,8 @@ parser.add_argument(
     type=str,
     default="/data2/minki/kaggle/ramdisk/background_32",
 )
+parser.add_argument("--log_dir", default=Path("/nfs3/minki/kaggle/birdclef-2021/ckpt"))
+
 parser.add_argument("--mixup", action="store_true")
 parser.add_argument("--use_secondary_label", "--sec", action="store_true")
 

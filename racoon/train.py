@@ -119,7 +119,7 @@ def get_runner(device: torch.device):
 
 warnings.filterwarnings("ignore")
 
-logdir = Path("out")
+logdir = CFG.log_dir
 logdir.mkdir(exist_ok=True, parents=True)
 if (logdir / "train.log").exists():
     os.remove(logdir / "train.log")

@@ -82,7 +82,7 @@ parser.add_argument(
     "--test_datadir", default=Path("/data2/minki/kaggle/ramdisk/test_soundscapes")
 )
 
-parser.add_argument("--test_weights_path", "--twp", type=Path, required=True)
+parser.add_argument("--test_weights_path", "--twp", type=Path)
 parser.add_argument("--test_threshold", "--tthr", type=float, default=0.3)
 
 CFG, _ = parser.parse_known_args()

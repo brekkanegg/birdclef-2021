@@ -1,62 +1,27 @@
-"""
-https://www.kaggle.com/hidehisaarai1213/pytorch-training-birdclef2021-starter/data
-
-# TODO: 
-# spectogram move to data
-# check dataset shape ----- 
-
-
-# Add noises, +a : data.py
-# Add Mix-up
-# amp
-# use rating ?
-# secondary label
-# add checkpoint callback
-
-"""
-
-import gc
 import os
-
-# import math
 import random
 import warnings
-
 import albumentations as A
-
-# import cv2
-# import librosa
 import numpy as np
 import pandas as pd
-
-# import soundfile as sf
-# import timm
 import torch
-
-# import torch.optim as optim
-# import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data as torchdata
-
-from pathlib import Path
-from typing import List
-
-# from albumentations.pytorch import ToTensorV2
-# from albumentations.core.transforms_interface import ImageOnlyTransform
-# from catalyst.core import Callback, CallbackOrder, IRunner
 from catalyst.dl import Runner, SupervisedRunner
 from sklearn import model_selection
+from pathlib import Path
+import os
+
+import argparse
 
 from config import CFG
 
-
-# from sklearn import metrics
-# from timm.models.layers import SelectAdaptivePool2d
-# from torch.optim.optimizer import Optimizer
-# from torchlibrosa.stft import LogmelFilterBank, Spectrogram
-# from torchlibrosa.augmentation import SpecAugmentation
-
+from utils import set_seed, init_logger
 from opts import get_optimizer, get_scheduler
+
+from losses import get_criterion
+from callbacks import get_callbacks
+
 
 if CFG.use == 1:
     from inputs.data import WaveformDataset  # baseline
@@ -64,57 +29,11 @@ if CFG.use == 1:
 elif CFG.use == 2:
     from inputs.data2 import WaveformDataset  # , get_transforms
     from models.model2 import TimmSED
-elif CFG.use == 3:
-    from inputs.data3 import WaveformDataset  # , get_transforms
-    from models.model2 import TimmSED
 
 
 print("==========")
 print(f"Method: {CFG.use}, Model: {CFG.base_model_name}, Name: {CFG.name}")
 print("==========")
-
-
-from losses import get_criterion
-from callbacks import get_callbacks
-
-
-# this notebook is by default run on debug mode (only train one epoch).
-# If you'd like to get the results on par with that of inference notebook, you'll need to train the model around 30 epochs
-
-
-def set_seed(seed=52):
-    random.seed(seed)
-    os.environ["PYTHONHASHSEED"] = str(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-
-
-def get_device() -> torch.device:
-    return torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
-def init_logger(log_file="train.log"):
-    from logging import getLogger, INFO, FileHandler, Formatter, StreamHandler
-
-    logger = getLogger(__name__)
-    logger.setLevel(INFO)
-    handler1 = StreamHandler()
-    handler1.setFormatter(Formatter("%(message)s"))
-    handler2 = FileHandler(filename=log_file)
-    handler2.setFormatter(Formatter("%(message)s"))
-    logger.addHandler(handler1)
-    logger.addHandler(handler2)
-    return logger
-
-
-def get_runner(device: torch.device):
-    return SupervisedRunner(
-        device=device, input_key="image", input_target_key="targets"
-    )
 
 
 warnings.filterwarnings("ignore")
@@ -127,7 +46,7 @@ logger = init_logger(log_file=logdir / "train.log")
 
 # environment
 set_seed(CFG.seed)
-device = get_device()
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # validation
 splitter = getattr(model_selection, CFG.split)(**CFG.split_params)
@@ -156,8 +75,6 @@ loaders = {
         WaveformDataset(
             df_,
             CFG.train_datadir,
-            # img_size=CFG.img_size,
-            # waveform_transforms=get_transforms(phase),
             period=CFG.period,
             validation=(phase == "valid"),
         ),
@@ -182,7 +99,7 @@ callbacks = get_callbacks()
 
 #     callbacks += [MixupCallback]
 
-runner = get_runner(device)
+runner = SupervisedRunner(device=device, input_key="image", input_target_key="targets")
 runner.train(
     model=model,
     criterion=criterion,

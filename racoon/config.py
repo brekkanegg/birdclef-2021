@@ -66,15 +66,24 @@ parser.add_argument("--num_workers", "--nw", type=int, default=4)
 parser.add_argument(
     "--base_model_name", "--model", type=str, default="resnest101e"
 )  # "tf_efficientnet_b0_ns", resnest101e
-parser.add_argument(
-    "--loss_name", "--loss", type=str, default="BCEFocal2WayLoss"
-)  # "tf_efficientnet_b0_ns"
+parser.add_argument("--loss_name", "--loss", type=str, default="BCEFocal2WayLoss")
 parser.add_argument("--optimizer_name", "--opt", type=str, default="Adam")
 parser.add_argument("--base_optimizer", type=str, default="Adam")
 parser.add_argument("--lr", type=float, default=1e-3)
 parser.add_argument(
     "--scheduler_name", "--sched", type=str, default="CosineAnnealingLR"
 )
+
+
+######################
+# Test #
+######################
+parser.add_argument(
+    "--test_datadir", default=Path("/data2/minki/kaggle/ramdisk/test_soundscapes")
+)
+
+parser.add_argument("--test_weights_path", "--twp", type=Path, required=True)
+parser.add_argument("--test_threshold", "--tthr", type=float, default=0.3)
 
 CFG, _ = parser.parse_known_args()
 

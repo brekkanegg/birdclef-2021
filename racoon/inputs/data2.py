@@ -124,6 +124,7 @@ def get_wav_transforms():
     """
     transforms = Compose(
         [
+            AddGaussianNoise(min_amplitude=0.001, max_amplitude=0.015, p=0.5),
             AddGaussianSNR(max_SNR=0.5, p=0.5),
             AddBackgroundNoise(
                 sounds_path=CFG.background_datadir,
@@ -131,6 +132,8 @@ def get_wav_transforms():
                 max_snr_in_db=2,
                 p=0.5,
             ),
+            FrequencyMask(min_frequency_band=0.0, max_frequency_band=0.5, p=0.5),
+            Gain(min_gain_in_db=-15, max_gain_in_db=15, p=0.5),
         ]
     )
     return transforms

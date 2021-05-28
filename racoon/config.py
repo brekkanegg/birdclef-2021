@@ -54,7 +54,7 @@ parser.add_argument(
     type=str,
     default="/data2/minki/kaggle/birdclef-2021/background_32",
 )
-parser.add_argument("--log_dir", default=Path("/nfs3/minki/kaggle/birdclef-2021/ckpt"))
+parser.add_argument("--log_dir", default=Path("/data2/minki/kaggle/birdclef-2021/ckpt"))
 
 parser.add_argument("--mixup", action="store_true")
 parser.add_argument("--use_secondary_label", "--sec", action="store_false")
@@ -63,7 +63,7 @@ parser.add_argument("--rating", type=float, default=2)
 ######################
 # Loaders #
 ######################
-parser.add_argument("--batch_size", "--b", type=int, default=64)
+parser.add_argument("--batch_size", "--b", type=int, default=48)
 parser.add_argument("--num_workers", "--nw", type=int, default=4)
 
 

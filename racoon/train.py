@@ -55,7 +55,7 @@ splitter = getattr(model_selection, CFG.split)(**CFG.split_params)
 train = pd.read_csv(CFG.train_csv)
 
 # add rating cut
-train = train.query("rating>=3").reset_index()
+train = train.query(f"rating>={CFG.rating}").reset_index()
 
 
 # main loop

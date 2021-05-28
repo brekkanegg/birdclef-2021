@@ -6,11 +6,11 @@ import argparse
 # control here
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--name", type=str, default="0527")
+parser.add_argument("--name", type=str, default="0528")
 parser.add_argument("--use", type=int, default=2)
 
 
-parser.add_argument("--period", type=int, default=10)
+parser.add_argument("--period", type=int, default=30)
 parser.add_argument("--n_mels", type=int, default=128)
 parser.add_argument("--fmin", type=int, default=20)
 parser.add_argument("--fmax", type=int, default=16000)
@@ -22,9 +22,9 @@ parser.add_argument("--sample_rate", type=int, default=32000)
 # Globals #
 ######################
 parser.add_argument("--gpu", "--g", type=str, default="3")
-parser.add_argument("--seed", type=int, default=52)
+parser.add_argument("--seed", type=int, default=819)
 parser.add_argument("--fold", type=int, default=0)
-parser.add_argument("--epochs", type=int, default=100)
+parser.add_argument("--epochs", type=int, default=150)
 parser.add_argument("--train", action="store_false")
 
 parser.add_argument("--main_metric", type=str, default="epoch_f1_at_05")
@@ -36,10 +36,13 @@ parser.add_argument("--minimize_metric", action="store_true")
 ######################
 
 parser.add_argument(
-    "--train_datadir", default=Path("/data2/minki/kaggle/birdclef-2021/train_short_audio")
+    "--train_datadir",
+    default=Path("/data2/minki/kaggle/birdclef-2021/train_short_audio"),
 )
 parser.add_argument(
-    "--train_csv", type=str, default="/data2/minki/kaggle/birdclef-2021/train_metadata.csv"
+    "--train_csv",
+    type=str,
+    default="/data2/minki/kaggle/birdclef-2021/train_metadata.csv",
 )
 parser.add_argument(
     "--train_soundscape",
@@ -54,7 +57,8 @@ parser.add_argument(
 parser.add_argument("--log_dir", default=Path("/nfs3/minki/kaggle/birdclef-2021/ckpt"))
 
 parser.add_argument("--mixup", action="store_true")
-parser.add_argument("--use_secondary_label", "--sec", action="store_true")
+parser.add_argument("--use_secondary_label", "--sec", action="store_false")
+parser.add_argument("--rating", type=float, default=2)
 
 ######################
 # Loaders #
@@ -64,14 +68,19 @@ parser.add_argument("--num_workers", "--nw", type=int, default=4)
 
 
 parser.add_argument(
-    "--base_model_name", "--model", type=str, default="resnest101e"
+    "--base_model_name", "--model", type=str, default="efficientnet_b0"
 )  # "tf_efficientnet_b0_ns", resnest101e
-parser.add_argument("--loss_name", "--loss", type=str, default="BCEFocal2WayLoss")
+parser.add_argument(
+    "--loss_name", "--loss", type=str, default="BCE2WayLoss"
+)  # "BCEFocal2WayLoss"
 parser.add_argument("--optimizer_name", "--opt", type=str, default="Adam")
 parser.add_argument("--base_optimizer", type=str, default="Adam")
 parser.add_argument("--lr", type=float, default=1e-3)
 parser.add_argument(
-    "--scheduler_name", "--sched", type=str, default="CosineAnnealingLR"
+    "--scheduler_name",
+    "--sched",
+    type=str,
+    default="CosineAnnealingLR",  # "CosineAnnealingWarmRestarts"
 )
 
 
@@ -108,7 +117,11 @@ CFG.split = "StratifiedKFold"
 CFG.split_params = {"n_splits": 5, "shuffle": True, "random_state": 52}
 CFG.loss_params = {}
 CFG.optimizer_params = {"lr": CFG.lr}
-CFG.scheduler_params = {"T_max": 10}
+if CFG.scheduler_name == "CosineAnnealingLR":
+    CFG.scheduler_params = {"T_max": 10}
+elif CFG.scheduler_name == "CosineAnnealingWarmRestarts":
+    CFG.scheduler_params = {"T_0": 10}
+
 CFG.pooling = "max"
 CFG.pretrained = True
 CFG.num_classes = 397

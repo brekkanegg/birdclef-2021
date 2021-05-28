@@ -134,6 +134,7 @@ def get_wav_transforms():
             ),
             FrequencyMask(min_frequency_band=0.0, max_frequency_band=0.5, p=0.5),
             Gain(min_gain_in_db=-15, max_gain_in_db=15, p=0.5),
+            # PitchShift(min_semitones=-4, max_semitones=4, p=0.5),
         ]
     )
     return transforms

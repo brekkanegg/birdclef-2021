@@ -4,6 +4,17 @@ import torch.nn as nn
 from config import CFG
 
 # https://www.kaggle.com/c/rfcx-species-audio-detection/discussion/213075
+
+
+class BCELoss(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, preds, targets):
+        loss = nn.BCEWithLogitsLoss(reduction="mean")(preds, targets)
+        return loss
+
+
 class BCEFocalLoss(nn.Module):
     def __init__(self, alpha=0.25, gamma=2.0):
         super().__init__()
@@ -42,7 +53,11 @@ class BCEFocal2WayLoss(nn.Module):
         return self.weights[0] * loss + self.weights[1] * aux_loss
 
 
-__CRITERIONS__ = {"BCEFocalLoss": BCEFocalLoss, "BCEFocal2WayLoss": BCEFocal2WayLoss}
+__CRITERIONS__ = {
+    "BCEFocalLoss": BCEFocalLoss,
+    "BCEFocal2WayLoss": BCEFocal2WayLoss,
+    "BCELoss": BCELoss,
+}
 
 
 def get_criterion():

@@ -36,20 +36,20 @@ parser.add_argument("--minimize_metric", action="store_true")
 ######################
 
 parser.add_argument(
-    "--train_datadir", default=Path("/data2/minki/kaggle/ramdisk/train_short_audio")
+    "--train_datadir", default=Path("/data2/minki/kaggle/birdclef-2021/train_short_audio")
 )
 parser.add_argument(
-    "--train_csv", type=str, default="/data2/minki/kaggle/ramdisk/train_metadata.csv"
+    "--train_csv", type=str, default="/data2/minki/kaggle/birdclef-2021/train_metadata.csv"
 )
 parser.add_argument(
     "--train_soundscape",
     type=str,
-    default="/data2/minki/kaggle/ramdisk/train_soundscape_labels.csv",
+    default="/data2/minki/kaggle/birdclef-2021/train_soundscape_labels.csv",
 )
 parser.add_argument(
     "--background_datadir",
     type=str,
-    default="/data2/minki/kaggle/ramdisk/background_32",
+    default="/data2/minki/kaggle/birdclef-2021/background_32",
 )
 parser.add_argument("--log_dir", default=Path("/nfs3/minki/kaggle/birdclef-2021/ckpt"))
 

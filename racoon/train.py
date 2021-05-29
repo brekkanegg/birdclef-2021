@@ -38,7 +38,8 @@ print("==========")
 
 warnings.filterwarnings("ignore")
 
-logdir = CFG.log_dir
+logdir = CFG.logdir / CFG.name
+
 logdir.mkdir(exist_ok=True, parents=True)
 if (logdir / "train.log").exists():
     os.remove(logdir / "train.log")
@@ -108,8 +109,13 @@ runner.train(
     scheduler=scheduler,
     num_epochs=CFG.epochs,
     verbose=True,
-    logdir=logdir / f"{CFG.name}/{CFG.fold}",  # FIXME:
+    logdir=logdir,  # FIXME:
     callbacks=callbacks,
     main_metric=CFG.main_metric,
     minimize_metric=CFG.minimize_metric,
+    resume=CFG.resume_dir,
+    check=CFG.check,
+    timeit=CFG.timeit,
+    overfit=CFG.overfit,
+    load_best_on_end=CFG.load_best_on_end,
 )

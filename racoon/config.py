@@ -54,7 +54,7 @@ parser.add_argument(
     type=str,
     default="/data2/minki/kaggle/birdclef-2021/background_32",
 )
-parser.add_argument("--log_dir", default=Path("/data2/minki/kaggle/birdclef-2021/ckpt"))
+parser.add_argument("--logdir", default=Path("/data2/minki/kaggle/birdclef-2021/ckpt"))
 
 parser.add_argument("--mixup", action="store_true")
 parser.add_argument("--use_secondary_label", "--sec", action="store_false")
@@ -63,8 +63,8 @@ parser.add_argument("--rating", type=float, default=2)
 ######################
 # Loaders #
 ######################
-parser.add_argument("--batch_size", "--b", type=int, default=48)
-parser.add_argument("--num_workers", "--nw", type=int, default=4)
+parser.add_argument("--batch_size", "--b", type=int, default=32)
+parser.add_argument("--num_workers", "--nw", type=int, default=8)
 
 
 parser.add_argument(
@@ -82,6 +82,15 @@ parser.add_argument(
     type=str,
     default="CosineAnnealingLR",  # "CosineAnnealingWarmRestarts"
 )
+
+######################
+# Custom #
+######################
+parser.add_argument("--resume_dir", "--resume", type=str, default=None)
+parser.add_argument("--check", action="store_true")
+parser.add_argument("--timeit", action="store_true")
+parser.add_argument("--overfit", action="store_true")
+parser.add_argument("--load_best_on_end", action="store_true")
 
 
 ######################
@@ -131,8 +140,8 @@ CFG.transforms = {"train": [{"name": "Normalize"}], "valid": [{"name": "Normaliz
 
 os.environ["CUDA_VISIBLE_DEVICES"] = CFG.gpu
 
-CFG.logdir = f"/data2/minki/kaggle/ramdisk/out/{CFG.name}"
-os.makedirs(CFG.logdir, exist_ok=True)
+# CFG.logdir = f"/data2/minki/kaggle/ramdisk/out/{CFG.name}"
+# os.makedirs(CFG.logdir, exist_ok=True)
 
 CFG.target_columns = [
     "acafly",

@@ -52,7 +52,7 @@ parser.add_argument(
 parser.add_argument(
     "--background_datadir",
     type=str,
-    default="/data2/minki/kaggle/birdclef-2021/background_32",
+    default="/data2/minki/kaggle/birdclef-2021/background_soundscape", #32
 )
 parser.add_argument("--logdir", default=Path("/data2/minki/kaggle/birdclef-2021/ckpt"))
 
@@ -68,8 +68,8 @@ parser.add_argument("--num_workers", "--nw", type=int, default=8)
 
 
 parser.add_argument(
-    "--base_model_name", "--model", type=str, default="efficientnet_b0"
-)  # "tf_efficientnet_b0_ns", resnest101e
+    "--base_model_name", "--model", type=str, default="resnext50_32x4d"
+)  # "tf_efficientnet_b0_ns", resnest101e, resnext50_32x4d, efficientnet_b0
 parser.add_argument(
     "--loss_name", "--loss", type=str, default="BCE2WayLoss"
 )  # "BCEFocal2WayLoss"

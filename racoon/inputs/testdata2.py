@@ -8,9 +8,10 @@ from config import CFG
 
 # FIXME: 10 --> 5
 class TestDataset(torchdata.Dataset):
-    def __init__(self, df: pd.DataFrame, clip: np.ndarray):
+    def __init__(self, df: pd.DataFrame, clip: np.ndarray, chunk=None):
         self.df = df
         self.clip = clip
+        self.chunk = chunk
 
     def __len__(self):
         return len(self.df)
@@ -34,7 +35,26 @@ class TestDataset(torchdata.Dataset):
 
         image = melspec[np.newaxis, ...]
 
-        return image, row_id
+        if self.clip is None:
+            return image, row_id
+
+        else:
+            end_seconds_c = max(int(sample.seconds + 3), 600)
+            start_seconds_c = min(int(end_seconds - 5 - 2), 0)
+            start_index_c = SR * start_seconds_c
+            end_index_c = SR * end_seconds_c
+
+            y_c = self.clip[start_index_c:end_index_c].astype(np.float32)
+
+            melspec_c = compute_melspec(y_c, CFG)
+            melspec_c = (melspec_c - melspec_c.mean()) / (melspec_c.std() + 1e-6)
+            melspec_c = (melspec_c - melspec_c.min()) / (
+                melspec_c.max() - melspec_c.min() + 1e-6
+            )
+
+            image_c = melspec_c[np.newaxis, ...]
+
+            return image, row_id, image_c
 
 
 def compute_melspec(y, params):

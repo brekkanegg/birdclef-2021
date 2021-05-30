@@ -22,7 +22,7 @@ if CFG.use == 1:
     from inputst.testdata import TestDataset  # baseline
     from models.model import TimmSED
 elif CFG.use == 2:
-    from inputs.testdata2 import TestDataset  # , get_transforms
+    from inputs.testdata2 import TestDataset, compute_melspec  # , get_transforms
     from models.model2 import TimmSED
 
 warnings.filterwarnings("ignore")
@@ -42,8 +42,7 @@ TARGET_SR = 32000
 DATADIR = CFG.test_datadir
 TEST = len(list(DATADIR.glob("*.ogg"))) != 0
 if not TEST:
-    # FIXME:
-    DATADIR = Path("/data2/minki/kaggle/ramdisk/train_soundscapes")
+    DATADIR = Path("/data2/minki/kaggle/birdclef-2021/train_soundscapes")
 
 test_audios = list(DATADIR.glob("*.ogg"))
 test_audio_ids = ["_".join(audio_id.name.split("_")[:2]) for audio_id in test_audios]
@@ -115,9 +114,45 @@ for audio_path in test_audios:
 
     test_df = pd.DataFrame({"row_id": row_ids, "seconds": seconds})
     with timer(f"Prediction on {audio_path}", logger):
-        prediction_dict = prediction_for_clip(
-            test_df, clip=clip, model=model, threshold=CFG.test_threshold
-        )
+
+        dataset = TestDataset(df=test_df, clip=clip, chunk=CFG.test_chunk)
+        loader = DataLoader(dataset, batch_size=1, shuffle=False)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        prediction_dict = {}
+        for data in loader:
+            row_id = data[1][0]
+            image = data[0].to(device)
+
+            with torch.no_grad():
+                prediction = model(image)
+                proba = prediction["clipwise_output"].detach().cpu().numpy().reshape(-1)
+
+                if CFG.test_chunk is not None:
+                    image_c = data[2].to(device)
+                    pred_c = model(image_c)
+                    proba_c = (
+                        pred_c["clipwise_output"].detach().cpu().numpy().reshape(-1)
+                    )
+
+            if CFG.test_chunk is not None:
+                events = (proba >= CFG.test_threshold) * (
+                    proba_c > CFG.test_threshold_chunk
+                )
+            else:
+                events = proba >= CFG.test_threshold
+
+            labels = np.argwhere(events).reshape(-1).tolist()
+
+            if len(labels) == 0:
+                prediction_dict[row_id] = "nocall"
+            else:
+                labels_str_list = list(map(lambda x: CFG.target_columns[x], labels))
+                label_string = " ".join(labels_str_list)
+                prediction_dict[row_id] = label_string
+        # prediction_dict = prediction_for_clip(
+        #     test_df, clip=clip, model=model, threshold=CFG.test_threshold
+        # )
     row_id = list(prediction_dict.keys())
     birds = list(prediction_dict.values())
     prediction_df = pd.DataFrame({"row_id": row_id, "birds": birds})

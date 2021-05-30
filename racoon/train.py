@@ -11,7 +11,7 @@ from catalyst.dl import Runner, SupervisedRunner
 from sklearn import model_selection
 from pathlib import Path
 import os
-
+import yaml
 import argparse
 
 from config import CFG
@@ -39,8 +39,11 @@ print("==========")
 warnings.filterwarnings("ignore")
 
 logdir = CFG.logdir / CFG.name
-
 logdir.mkdir(exist_ok=True, parents=True)
+
+with open(logdir / "cfg.yaml", "w") as f:
+    yaml.dump(vars(CFG), f, sort_keys=False)
+
 if (logdir / "train.log").exists():
     os.remove(logdir / "train.log")
 logger = init_logger(log_file=logdir / "train.log")

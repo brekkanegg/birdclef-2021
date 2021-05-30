@@ -23,7 +23,7 @@ parser.add_argument("--sample_rate", type=int, default=32000)
 ######################
 parser.add_argument("--gpu", "--g", type=str, default="3")
 parser.add_argument("--seed", type=int, default=819)
-parser.add_argument("--fold", type=int, default=0)
+parser.add_argument("--fold", "--f", type=int, default=0)
 parser.add_argument("--epochs", type=int, default=150)
 parser.add_argument("--train", action="store_false")
 
@@ -52,7 +52,7 @@ parser.add_argument(
 parser.add_argument(
     "--background_datadir",
     type=str,
-    default="/data2/minki/kaggle/birdclef-2021/background_soundscape", #32
+    default="/data2/minki/kaggle/birdclef-2021/background_soundscape",  # 32
 )
 parser.add_argument("--logdir", default=Path("/data2/minki/kaggle/birdclef-2021/ckpt"))
 
@@ -93,15 +93,18 @@ parser.add_argument("--overfit", action="store_true")
 parser.add_argument("--load_best_on_end", action="store_true")
 
 
+
 ######################
 # Test #
 ######################
 parser.add_argument(
-    "--test_datadir", default=Path("/data2/minki/kaggle/ramdisk/test_soundscapes")
+    "--test_datadir", default=Path("/data2/minki/kaggle/birdclef-2021/test_soundscapes")
 )
 
 parser.add_argument("--test_weights_path", "--twp", type=Path)
 parser.add_argument("--test_threshold", "--tthr", type=float, default=0.3)
+parser.add_argument("--test_threshold_chunk", type=float, default=0.5)
+parser.add_argument("--test_chunk", type=int, default=30)
 
 CFG, _ = parser.parse_known_args()
 

@@ -4,7 +4,9 @@ import time
 import numpy as np
 import torch
 import logging
+from pathlib import Path
 
+import pandas as pd
 from contextlib import contextmanager
 from typing import Optional
 
@@ -69,3 +71,61 @@ def timer(name: str, logger: Optional[logging.Logger] = None):
         print(msg)
     else:
         logger.info(msg)
+
+
+def get_stats(submission):
+    nocall_submit = submission.query("birds=='nocall'")
+    yescall_submit = submission.query("birds!='nocall'")
+    bird_num = 0
+    for _, r in yescall_submit.iterrows():
+        bird_num += len(r["birds"].split(" "))
+
+    nocall_num = len(nocall_submit)
+    nocall_r = len(nocall_submit) / len(submission)
+    bird_per_yescall = bird_num / (len(yescall_submit) + 1e-4)
+
+    return nocall_num, nocall_r, bird_per_yescall
+
+
+# Helper functions
+
+
+def get_cv(submission):
+    def get_metrics(s_true, s_pred):
+        s_true = set(s_true.split(" "))
+        s_pred = set(s_pred.split(" "))
+        tp, gt, pred = len(s_true.intersection(s_pred)), len(s_true), len(s_pred)
+        fp = pred - tp
+        fn = gt - tp
+
+        return {
+            "tp": tp,
+            "fp": fp,
+            "fn": fn,
+        }
+
+    # TEST_AUDIO_ROOT = Path("/data2/minki/kaggle/birdclef-2021/train_soundscapes")
+    TARGET_PATH = Path("/data2/minki/kaggle/birdclef-2021/train_soundscape_labels.csv")
+
+    # if TARGET_PATH:
+    sub_target = pd.read_csv(TARGET_PATH)
+    sub_target = sub_target.merge(submission, how="left", on="row_id")
+
+    #     print(sub_target["birds_x"].notnull().sum(), sub_target["birds_x"].notnull().sum())
+    assert sub_target["birds_x"].notnull().all()
+    assert sub_target["birds_y"].notnull().all()
+
+    df_metrics = pd.DataFrame(
+        [
+            get_metrics(s_true, s_pred)
+            for s_true, s_pred in zip(sub_target.birds_x, sub_target.birds_y)
+        ]
+    )
+
+    tot_tp = df_metrics["tp"].sum()
+    tot_fp = df_metrics["fp"].sum()
+    tot_fn = df_metrics["fn"].sum()
+
+    micro_f1 = 2 * tot_tp / (2 * tot_tp + tot_fp + tot_fn + 1e-4)
+
+    return micro_f1
